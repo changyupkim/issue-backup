@@ -1,0 +1,85 @@
+# The Jira backup utility
+
+- This utility is to backup a project hosted in a Jira repository.
+- Assume that this utility has a limited access right such as Jira devloper or user, not as Jira administrator.
+- This utility is written in Javascript so that it could be well integrated with iOrg code base.
+
+# Architecture design
+
+This utility retrieves the data in the Jira instance via its REST APIs.
+The REST APIs are called based on a scenario.
+A resource or the same type of resources are represented by a scene.
+The scenario is a collection of scenes. A scene is composed of the scene identifier and scene description.
+The description has the properties.
+
+* prev : array of previous scenes that must come before this scene
+* method : HTTP verb
+* api : REST API
+* params : query parameters to the REST API
+* pre : precondition, The scene is played only when the precondion is true.
+* post : postcondition, The next scenes are not loaded if the postcondion is not met.
+
+For example, the scenes, 'project' and 'components', are serialized. The 'apis' in a scene can be executed in parallel.
+
+{
+	"project" : {
+		"prevs" : [],
+		"method" : "GET",
+		"apis" : ["/project/KEY"],
+		"params" : [""]
+	},
+	"components" : {
+		"prevs" : ["project"],
+		"method" : "GET",
+		"apis" : function(project) {
+			project.components.map(function(elm) {
+				return "/component/" + elm.id;
+			})
+		}
+		"params" : function(project) {
+			project.components.map(function(elm) {
+				return "";
+			})
+		}
+	}
+}
+
+Construct the sequence of scenes, plot, referring to the dependencies among the scenes. The plot is backed by the data structure, directed graph.
+
+The plot is played in a bread-first manner.
+
+The output of each scene is structured as
+
+{
+	uri : resource data
+}
+
+For example,
+
+{
+	"http://localhost/rest/api/latest/project" : {
+		...
+	},
+	"http://localhost/res/api/latest/search?jql=project=FOO" : {
+		...
+	}
+}
+
+## Scene graph
+
+It's a directed graph, digraph.
+A vertex in a graph represents a scene.
+
+	{
+		id: ID of the referring scene
+		edges: array of seccessor vertices
+		data: ad-hoc data when traversing the graph
+	}
+
+# Synchronization library
+
+Use of a flow control library.
+
+- synchronize.js
+- node-seq
+- node-sync
