@@ -1,12 +1,14 @@
-//
-// Jira backup scenario
-//
+/*
+ * Jira backup scenario
+ *
+ *
+ */
 
 var scenario = {
 	"project" : {
 		"prevs" : [],
 		"method" : "GET",
-		"apis" : ["/project/KEY"],
+		"names" : ["/project/"],
 		"params" : [""],
 		"pre" : [],
 		"post" : []
@@ -14,15 +16,23 @@ var scenario = {
 	"components" : {
 		"prevs" : ["project"],
 		"method" : "GET",
-		"apis" : function(project) {
-			var apis = project.components.map(function(elm) {
-				return "/component/" + elm.id;
+		"names" : function(project) {
+			// var uris = Object.keys(project);
+			// var apis = project[uris[0]].components.map(function(elm) {
+			// 	return "/component/" + elm.id;
+			// });
+			var names = project[0].contents.components.map(function(e) {
+				return '/component/' + e.id;
 			});
-			return apis;
+			return names;
 		},
 		"params" : function(project) {
-			var params = project.components.map(function(elm) {
-				return "";
+			// var uris = Object.keys(project);
+			// var params = project[uris[0]].components.map(function(elm) {
+			// 	return "";
+			// });
+			var params = project[0].contents.components.map(function(e) {
+				return '';
 			});
 			return params;
 		},

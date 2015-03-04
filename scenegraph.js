@@ -1,115 +1,190 @@
 /*
  * Scene Graph
  *
+ * It's a digraph.
+ * - The vertices of the graph are the Scene objects. 
+ * - The edges of a vertex are embedded in the Scene object.
  */
-
- function SceneGraph(conf, scenario) {
+ function SceneGraph(conf, scenes) {
  	this.conf = conf;
- 	this.scenario = scenario;
- 	this.vertices = [];
+ 	this.scenes = scenes;
 
-	/* conver the scenario into a scene digraph */
-	(function parse() {
-		/* digraph representation as a adjacency list */
-		var graph = {
-			vertices : []
-		};
-
-		/* populate vertices in the graph */
-		for (var sceneId in this.scenario) {
-			console.log(sceneId);
-
-			var vertex = {
-				id : sceneId,
-				edges : [],
-				visited : false
-			};
-
-			this.vertices.push(vertex);
-		}
-
-		/* populate edges for the vertices */
-		for (var sceneId in this.scenario) {
-			this.scenario[sceneId].prevs.forEach(function(predecessor) {
-				this.vertices.forEach(function(vertex) {
-					if (vertex.id === predecessor) {
-						vertex.edges.push(sceneId);
-					}
-				});
-			});
-		}
-
-		// console.log('%j', graph);
-		console.log('graph = ' + JSON.stringify(this.graph, null, 2));
-	}());
-
-	/* set the result of a scene playing */
-	function setResult(result) {}
-
-	/* get the result of a scene playing */
-	function getResult(sceneId) {}
-
-	/* search the graph and return the matched vertex */
-	function search(from, match) {
-		return ;
-	}
+	/* populate edges for the vertices */
+	this.scenes.forEach(function(scene) {		
+		scene.desc.prevs.forEach(function(prev) {
+			prev.edges.push(scene);
+		});
+	});
 
 	/*
 	 * traverse the graph in a breadth-first manner
 	 *
+	 * The @visit function is of the form, visit(vertex, callback).
+	 *	vertex : the vertex object
+	 *	callback : The visit function calls when its business is done.
+	 * 
 	 * The @visit function passes the array of resources obtained from a scene to its callback.
-	 * A resource is {
-	 *	uri : (String),
-	 *	contents : (JSON) 
-	 * }
+	 * A resource format is as follows.
+	 *	{
+	 *		uri : (String),
+	 *		contents : (JSON) 
+	 *	}
+	 *
+	 * The @callback is passed in two arguments.
+	 *	err
+	 *	result : collection of all the resources that the @visit function has found
 	 *
 	 * @param from	array of vertices to start traversing from
 	 * @param visit function to execute on a each vertex
 	 * @param callback function to be called when the traversal finishes
 	 */
-	function traverse(from, visit, callback) {
-		var results = {}; // collection of what the visitor returns at each vertex
-		var queue = from;
+	this.traverse = function(from, visit, callback) {
+		var results = [];
+		var queue = from.slice();
 
+		console.log('traversal queue length = ' + queue.length);
+		console.assert(queue.length > 0);
+
+		var scene = queue.shift();
+		console.log('queue lenth = ' + queue.length);
 		
-		var first = queue.shift();	// first vertex to visit
-
-		visit(first, function _callback(err, resources) {
+		visit(scene, function cb(err, result) {
 			if (err) {
 				throw err;
 			}
 
-			first.visited = true;
-			resources.forEach(function(resource) {
-				results[resource.uri] = resource.contents;
+			console.log('The scene, ' + result.id + ', is done.');
+
+			result.resources.forEach(function(resource) {
+				results.push(resource);
 			});
 
-			first.edges.forEach(function(successor) {
-				var predecessors = search(from, function(v) {
-					if (v.edges.indexOf(successor) === -1) {
-						return false;
-					} else {
-						console.assert(v.edges.indexOf(successor) >= 0);
-						return true;
-					}
-				});
+			result.visited = true;
 
+			result.edges.forEach(function(successor) {
+				var predecessors = successor.desc.prevs;
 				if (predecessors.every(function(predecessor) {
 					return predecessor.visited === true;
 				})) {
 					queue.push(successor);
 				}
+			});
 
-				if (queue.length > 0) {
-					var next = queue.shift();
-					visit(next, _callback);
-				} else {
-					callback();
+			console.log(queue.length);
+
+			if (queue.length > 0) {
+				var next = queue.shift();
+				console.log('dequeued ' + next.id);
+				console.log(queue.length);
+				// visit(queue.shift(), cb);
+				visit(next, cb);
+			} else {
+				console.log('No more scene is left in the queue.');
+				callback(err, results);
+			}
+		});
+	}
+
+	this.traverse2 = function(from, visit, callback) {
+		var results = [];
+		var queue = from.slice();
+
+		console.log('queue lenth = ' + queue.length);
+		console.assert(queue.length > 0);
+
+		var scene = queue.shift();
+		console.log('queue lenth = ' + queue.length);
+		
+		visit(scene, function cb(err, result) {
+			if (err) {
+				throw err;
+			}
+
+			console.log('The scene, ' + scene.id + ', is done.');
+
+			results.push(result);
+
+			scene.visited = true;
+
+			scene.edges.forEach(function(successor) {
+				var predecessors = successor.desc.prevs;
+				if (predecessors.every(function(predecessor) {
+					return predecessor.visited === true;
+				})) {
+					queue.push(successor);
 				}
 			});
-		});
 
+			console.log(queue.length);
+
+			if (queue.length > 0) {
+				var next = queue.shift();
+				console.log('dequeued ' + next.id);
+				console.log(queue.length);
+				// visit(queue.shift(), cb);
+				visit(next, cb);
+			} else {
+				console.log('No more scene is left in the queue.');
+				callback(err, results);
+			}
+		});
+	}
+
+	this.traverse1 = function(from, visit, callback) {
+		var results = {}; // collection of what the visitor returns at each vertex
+		var queue = from;
+		
+		while (queue.length > 0) {
+			var scene = queue.shift();	// first vertex to visit
+
+			visit(scene);
+			scene.visited = true;
+
+			scene.edges.forEach(function(successor) {
+				var predecessors = successor.desc.prevs;
+				if (predecessors.every(function(predecessor) {
+					return predecessor.visited === true;
+				})) {
+					queue.push(successor);
+				}
+			});
+		}
+
+		// visit(first, function _callback(err, resources) {
+		// 	if (err) {
+		// 		throw err;
+		// 	}
+
+		// 	first.visited = true;
+		// 	resources.forEach(function(resource) {
+		// 		results[resource.uri] = resource.contents;
+		// 	});
+
+		// 	first.edges.forEach(function(successor) {
+		// 		var predecessors = search(from, function(v) {
+		// 			if (v.edges.indexOf(successor) === -1) {
+		// 				return false;
+		// 			} else {
+		// 				console.assert(v.edges.indexOf(successor) >= 0);
+		// 				return true;
+		// 			}
+		// 		});
+
+		// 		if (predecessors.every(function(predecessor) {
+		// 			return predecessor.visited === true;
+		// 		})) {
+		// 			queue.push(successor);
+		// 		}
+
+		// 		if (queue.length > 0) {
+		// 			var next = queue.shift();
+		// 			visit(next, _callback);
+		// 		} else {
+		// 			callback(err, results);
+		// 		}
+		// 	});
+		// });
 	}
  }
 
- module.exports.SceneGraph = SceneGraph;
+ module.exports = SceneGraph;

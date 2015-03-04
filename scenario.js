@@ -1,63 +1,90 @@
 /*
- * ScenarioCon, Scenario controller/manager
+ * Scenario, Scenario controller/manager
  *
  * - repository specific
  */
 
-function ScenarioCon(conf, scenario) {
+var Scene = require('./scene');
+var SceneGraph = require('./sceneGraph');
+
+function Scenario(conf, scenario) {
 	this.conf = conf;
-	this.scenario = scenario;
-	this.sceneCon = new SceneCone(conf);
-	this.graph = new SceneGraph(conf, scenario);
+	this.scenes = loadScenes.call(this, scenario);
+	this.sceneGraph = new SceneGraph(conf, this.scenes);
 
-	/* get the scenes that do not have predecessors
-	 *
-	 * returns the array of scene IDs
-	 */
-	function getIndependentScenes {
-		var scenes = [];
-
-		for (var scene in this.scenario) {
-			if (this.scenario[scene].prevs.length === 0) {
-				scenes.push(scene);
+	function findScene(scenes, sceneId) {
+		for (var i=0; i < scenes.length; i++) {
+			if (scenes[i].id === sceneId) {
+				return scenes[i];
 			}
 		}
 
-		console.log('independent scenes : ' + scenes);
+		console.assert(false, 'The scene, ' + sceneId + ', is not found.');
+	}
+
+	/*
+	 * Load the scenes described in the @scenario into the Scene objects
+	 */
+	function loadScenes(scenario) {
+		var scenes = [];
+
+		// construct the scene objects
+		for (var sceneId in scenario) {
+			// console.log('Load the scene, ' + sceneId);
+
+			var scene = new Scene(this.conf, this, sceneId, scenario[sceneId]);
+			scenes.push(scene);
+		}
+
+		// use the object references instead of IDs
+		scenes.forEach(function(scene, i, _scenes) {
+			scene.desc.prevs.forEach(function(id, i, _prevs) {
+				_prevs[i] = findScene(_scenes, id);
+			});
+		});
+
+		console.log(scenes.length + ' scenes are loaded.');
 
 		return scenes;
 	}
 
-	/* get the scene of @sceneId ID */
-	// this.getScene = function(sceneId) {
-	// 	return this.scenario[sceneId];
-	// }
+	/*
+	 * get the scenes that do not have predecessors
+	 *
+	 */
+	function getIndependentScenes(scenes) {
+		var results = [];
 
-	/* run the scenario */
-	this.run = function() {
-		console.log('Run the scenario');
-
-		var root = getIndependentScenes(this.scenario);
-		var output = bfs(graph, root, function(v) {
-			console.log('Visit ' + v);
-
-			var scene = this.scenario[v];
-			var pred = this.sceneCon.getPrecessors(scene);
-			// var uris = this.sceneCon.getUri(scene, );
-			var result = this.sceneCon.run(scene);
-
-			return {
-				uri : v,
-				resource : "bar"
-			};
+		scenes.forEach(function(scene) {
+			if (scene.desc.prevs.length === 0) {
+				results.push(scene);
+			}
 		});
 
-		console.log(JSON.stringify(output, null, 2));
+		return results;
+	}
 
-		return output;
+	/*
+	 * run the scenario
+	 */
+	this.run = function(callback) {
+		console.log('Run the scenario');
+
+		var from = getIndependentScenes(this.scenes);
+
+		// from[0].run();
+		// return;
+
+		this.sceneGraph.traverse(from, function(scene, _callback) {
+			console.log('Visit the scene, ' + scene.id);
+
+			scene.run(_callback);
+		}, function(err, results) {
+			console.log('End the traversal');
+			
+			callback(err, results);
+		});
 	}
 }
 
-// module.exports.getIndependentScenes = getIndependentScenes;
-// module.exports.getScene = getScene; = getIndependentScenes;
-module.exports.ScenarioCon = ScenarioCon;
+module.exports = Scenario;
