@@ -13,44 +13,37 @@
  * are utilized to construct the query in a scene.
  *
  * @method : query method
- * @names : array of resrouce names
- * @params : array of query parameters
+ * @paths : array of URL paths
+ * @data : post data
+ * @resources : extracts the resources in the results of a single query
  */
 
-// var scenario = {
 function getScenario(conf) {
 	return {
 		"project" : {
 			"prevs" : [],
 			"method" : "GET",
-			"names" : ["/project/" + conf.project],
-			"params" : [""],
+			"paths" : ["/project/" + conf.project],
+			"data" : [""],
 			"pre" : [],
-			"post" : []
+			"post" : [],
+			"resources" : function(response) {
+				return {
+					"uri" : response.self,
+					"contents" : response
+				};
+			}
 		},
 		"components" : {
 			"prevs" : ["project"],
 			"method" : "GET",
-			"names" : function(project) {
-				// var uris = Object.keys(project);
-				// var apis = project[uris[0]].components.map(function(elm) {
-				// 	return "/component/" + elm.id;
-				// });
-				var names = project[0].contents.components.map(function(e) {
+			"paths" : function(project) {
+				var paths = project[0].contents.components.map(function(e) {
 					return '/component/' + e.id;
 				});
-				return names;
+				return paths;
 			},
-			"params" : function(project) {
-				// var uris = Object.keys(project);
-				// var params = project[uris[0]].components.map(function(elm) {
-				// 	return "";
-				// });
-				var params = project[0].contents.components.map(function(e) {
-					return '';
-				});
-				return params;
-			},
+			"data" : [],
 			"pre" : [
 				{
 					"project" : function(res) {
@@ -59,18 +52,30 @@ function getScenario(conf) {
 				}
 			],
 			"post" : [],
+			"resources" : function(response) {
+				return {
+					"uri" : response.self,
+					"contents" : response
+				};
+			}
 		},
-		// "issues" : {
-		// 	"prevs" : ["project"],
-		// 	"method" : "GET",
-		// 	"names" : ["/search?jql=project=" + conf.project],
-		// 	"params" : [],
-		// 	"pre" : [],
-		// 	"post" : []
-		// }
+		"issues" : {
+			"prevs" : ["project"],
+			"method" : "GET",
+			"paths" : ["/search?jql=project=" + conf.project + "&fields=*all"],
+			"data" : [],
+			"pre" : [],
+			"post" : [],
+			"resources" : function(response) {
+				return response.issues.map(function(issue) {
+					return {
+						uri : issue.self,
+						contents : issue
+					}
+				});
+			}
+		}
 	};
 }
-// };
 
-// module.exports.scenario = scenario;
 module.exports.getScenario = getScenario;

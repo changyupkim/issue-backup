@@ -74,9 +74,6 @@
 
 			if (queue.length > 0) {
 				var next = queue.shift();
-				console.log('dequeued ' + next.id);
-				console.log(queue.length);
-				// visit(queue.shift(), cb);
 				visit(next, cb);
 			} else {
 				console.log('No more scene is left in the queue.');

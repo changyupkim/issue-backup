@@ -6,7 +6,7 @@
  * @param scene a scene object
  */
 var http = require('http');
-var url = require('url');
+var URL = require('url');
 
 function Scene(conf, scenario, id, description) {
 	this.conf = conf;
@@ -36,6 +36,7 @@ Scene.prototype.getPreviousScenes = function() {
  * An empty array is returned when no resource is assocaited
  * with the scene.
  */
+/*
 Scene.prototype.getURIs = function() {
 	var uris;
 
@@ -80,6 +81,44 @@ Scene.prototype.getURIs = function() {
 
 	return uris;
 }
+*/
+
+Scene.prototype.getURLs = function() {
+	var urls,
+		base,
+		paths;
+
+	// construct the base part
+
+	base = this.conf.protocol + "://" + this.conf.server;
+	if (this.conf.port) {
+		base = base + ":" + this.conf.port;
+	}
+	base += this.conf.rest;
+
+	// construct the path part
+
+	if (typeof this.desc.paths === 'function') {
+		var args = this.getPreviousScenes().map(function(scene) {
+			return scene.resources;
+		});
+		console.log(args);
+
+		paths = this.desc.paths.apply(null, args);
+	} else if (this.desc.paths instanceof Array) {
+		paths = this.desc.paths.slice();
+	} else {
+		throw new Error('Scene[paths] is not a function nor an array');
+	}
+
+	// concatenate 'base' + 'location'
+
+	urls = paths.map(function(loc) {
+		return (base + loc);
+	});
+
+	return urls;
+}
 
 /*
  * Run the scene under the scenario
@@ -90,48 +129,98 @@ Scene.prototype.getURIs = function() {
  * @param callback(err, result)
  * @return the result of the scene
  */
+// Scene.prototype.run = function(callback) {
+// 	console.log('Run the scene, ' + this.id);
+
+// 	var uris = this.getURIs();
+
+// 	if (uris.length === 0) {
+// 		console.log('URIs = N/A');
+// 		callback(null, this);
+
+// 		// throw new Error();
+// 		// return;
+// 	} else {
+// 		console.log('URIs = ' + uris);
+
+// 		uris.forEach(function(uri) {
+// 			console.log('Get the resource, ' + uri);
+
+// 			var options = url.parse(uri);
+// 			this.desc.port && (options.port = this.desc.port);
+// 			options.method = this.desc.method;
+// 			options.auth = this.conf.username + ':' + this.conf.password;
+// 			// console.log(options);
+
+// 			var that = this;
+// 		    var results = '';
+// 		    var req = http.request(options, function(res) {
+// 		        // console.log('The %s, responded with %j.', repo.host, res.headers);
+// 		        res.setEncoding('utf-8');
+// 		        res.on('data', function(data) {
+// 		            results += data;
+// 		        });
+// 		        res.on('end', function() {
+// 		        	var contents = JSON.parse(results);
+// 		        	console.log(contents);
+// 		            // console.log('results (%j)', results);
+
+// 		            that.resources.push({
+// 		            	'uri' : uri,
+// 		            	'contents' : contents
+// 		            });
+
+// 		            if (uris.length === that.resources.length) {
+// 						console.log('End the scene, ' + that.id);
+// 			            callback(null, that);
+// 		        	}
+// 		        });
+// 		    })
+// 	 		.on('error', function(e) {
+// 		    	// throw e;
+// 		    	callback(e);
+// 		    })
+// 		    .end();
+// 		}, this);
+// 	}
+// }
+
 Scene.prototype.run = function(callback) {
 	console.log('Run the scene, ' + this.id);
 
-	var uris = this.getURIs();
+	var urls = this.getURLs();
 
-	if (uris.length === 0) {
-		console.log('URIs = N/A');
+	if (urls.length === 0) {
+		console.log('URLs = N/A');
 		callback(null, this);
 
 		// throw new Error();
 		// return;
 	} else {
-		console.log('URIs = ' + uris);
+		console.log('URLs = ' + urls);
 
-		uris.forEach(function(uri) {
-			console.log('Get the resource, ' + uri);
+		var cnt = urls.length;
 
-			var options = url.parse(uri);
-			this.desc.port && (options.port = this.desc.port);
+		urls.forEach(function(url, i) {
+			console.log('query ' + url);
+
+			var options = URL.parse(url);
 			options.method = this.desc.method;
 			options.auth = this.conf.username + ':' + this.conf.password;
-			// console.log(options);
 
 			var that = this;
 		    var results = '';
-		    var req = http.request(options, function(res) {
-		        // console.log('The %s, responded with %j.', repo.host, res.headers);
+		    var req = that.conf.ajax.request(options, function(res) {
 		        res.setEncoding('utf-8');
 		        res.on('data', function(data) {
 		            results += data;
 		        });
 		        res.on('end', function() {
-		        	var contents = JSON.parse(results);
-		        	console.log(contents);
-		            // console.log('results (%j)', results);
+		        	var d = JSON.parse(results);
 
-		            that.resources.push({
-		            	'uri' : uri,
-		            	'contents' : contents
-		            });
+		        	that.resources.push(that.desc.resources(d));
 
-		            if (uris.length === that.resources.length) {
+		            if (--cnt === 0) {
 						console.log('End the scene, ' + that.id);
 			            callback(null, that);
 		        	}
@@ -145,5 +234,4 @@ Scene.prototype.run = function(callback) {
 		}, this);
 	}
 }
-
 module.exports = Scene;
