@@ -84,15 +84,10 @@ Scene.prototype.getURIs = function() {
 /*
  * Run the scene under the scenario
  *
- * This function is synchronous. The running results will be saved in the 'resources' property.
+ * This function is asynchronous. When the scene is played out, the @callback is invoked.
+ * The 'result' parameter is the scene itself.
  *
- * The result format is an array of the JSON objects
- *	{
- *		uri : ...	// String
- *		resource : ...	// JSON
- *	}
- *
- * @parma args array of results from the predecessor scenes 
+ * @param callback(err, result)
  * @return the result of the scene
  */
 Scene.prototype.run = function(callback) {
@@ -102,7 +97,6 @@ Scene.prototype.run = function(callback) {
 
 	if (uris.length === 0) {
 		console.log('URIs = N/A');
-		// callback(null, this.resources);
 		callback(null, this);
 
 		// throw new Error();
@@ -131,9 +125,7 @@ Scene.prototype.run = function(callback) {
 		        	var contents = JSON.parse(results);
 		        	console.log(contents);
 		            // console.log('results (%j)', results);
-		            // callback(null, results);
 
-		            // that.resources[uri] = contents;
 		            that.resources.push({
 		            	'uri' : uri,
 		            	'contents' : contents
@@ -141,7 +133,6 @@ Scene.prototype.run = function(callback) {
 
 		            if (uris.length === that.resources.length) {
 						console.log('End the scene, ' + that.id);
-			            // callback(null, that.resources);
 			            callback(null, that);
 		        	}
 		        });
