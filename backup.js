@@ -79,7 +79,19 @@ function checkJiraVersion(conf, callback) {
 			})) {
 				console.info('supported version, ' + version);
 
-				callback(null);
+				var fpath = path.join(conf.dest, 'server_info.json');
+				console.info(fpath);
+
+				var fd = fs.openSync(fpath, 'w');
+				if (fd < 0) {
+					var e = new Error('could not open, ' + fpath);
+					callback(e);
+				} else {
+					fs.writeSync(fd, data);
+					fs.closeSync(fd);
+
+					callback(null);
+				}
 			} else {
 				var e = new Error('not supported version, ' + version);
 				callback(e);
@@ -146,7 +158,8 @@ function backup() {
 	getopt.setHelp(
 		"USAGE: node backup.js OPTIONS DEST\n"
 		+ "\tDEST\n"
-		+ "\t\tdestination directory where the backup copies are saved.\n"
+		+ "\t\tdestination directory in the local filesystem where the backup copies are saved."
+		+ "\t\tIt should be present to run the backup.\n"
 		+ "\tOPTIONS\n"
 		+ "\t\t-c FILE, configuration file (mandatory)\n"
 		+ "\t\t-h, display this help\n"
@@ -173,6 +186,8 @@ function backup() {
 	dest = path.resolve(opt.argv[0]);
 
 	/* configure */
+
+	conf.dest = dest;
 
 	switch(conf.type) {
 	case 'jira':
