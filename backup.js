@@ -2,6 +2,8 @@ var path = require('path');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
+var GetOpt = require('node-getopt');
+
 var Scenario = require('./scenario');
 
 /*
@@ -125,37 +127,52 @@ function check(conf, callback) {
 	});
 }
 
-function printUsage() {
-	console.log("USAGE:\n"
-		+ "\tSYNOPSIS\n"
-		+ "\t\tnode backup OPTIONS DEST\n"
-		+ "\tDEST\n"
-		+ "\t\tdestination directory where the backup copies are saved.\n"
-		+ "\tOPTIONS\n"
-		+ "\t\t -c, configuration file (mandatory)\n"
-	);
-}
-
 /*
  * usage:
  *	node backup -c <configuration file> DEST
  */
 function backup() {
 	var conf,
+		dest,
 		repo;
 
-	/* set up for backup */
+	/* parse the command line */
 
-	var argv = process.argv.splice(2);
-	var argc = argv.length;
+	var getopt = new GetOpt([
+		['c', '=', 'configuration file'],
+		['h', '', 'display this help']
+	]);
 
-	if (argc === 0) {
-		conf = require('./conf');
-	} else if (argc === 1) {
-		conf = require(path.resolve(argv[0]));
-	} else {
-		console.error('invalid number of arguments, ' + argc);
+	getopt.setHelp(
+		"USAGE: node backup.js OPTIONS DEST\n"
+		+ "\tDEST\n"
+		+ "\t\tdestination directory where the backup copies are saved.\n"
+		+ "\tOPTIONS\n"
+		+ "\t\t-c FILE, configuration file (mandatory)\n"
+		+ "\t\t-h, display this help\n"
+		+ "\tEXAMPLES\n"
+		+ "\t\tnode backup.js -c config.json backup\n"
+		+ "\t\tnode backup.js -h\n"
+	);
+
+	var opt = getopt.parseSystem();
+
+	if (opt.options.h === true) {
+		getopt.showHelp();
+
+		return 0;
 	}
+
+	if (!opt.options.c || opt.argv.length !== 1) {
+		getopt.showHelp();
+
+		return 1;
+	}
+
+	conf = require(path.resolve(opt.options.c));
+	dest = path.resolve(opt.argv[0]);
+
+	/* configure */
 
 	switch(conf.type) {
 	case 'jira':
