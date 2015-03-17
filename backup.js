@@ -125,9 +125,20 @@ function check(conf, callback) {
 	});
 }
 
+function printUsage() {
+	console.log("USAGE:\n"
+		+ "\tSYNOPSIS\n"
+		+ "\t\tnode backup OPTIONS DEST\n"
+		+ "\tDEST\n"
+		+ "\t\tdestination directory where the backup copies are saved.\n"
+		+ "\tOPTIONS\n"
+		+ "\t\t -c, configuration file (mandatory)\n"
+	);
+}
+
 /*
  * usage:
- *	backup <configuration file>
+ *	node backup -c <configuration file> DEST
  */
 function backup() {
 	var conf,
