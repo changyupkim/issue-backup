@@ -4,7 +4,7 @@
 	"server" : "192.168.10.57",
 	"port" : "8080",
 	"rest" : "/rest/api/latest",
-	"username" : "cykim",
+	"username" : "jdev",
 	"password" : "yup123",
 	"project" : "BACKUP"
 }

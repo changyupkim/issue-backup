@@ -10,9 +10,8 @@ var Scenario = require('./scenario');
  * @param callback(Error e)
  * @return Any error is returned to its caller via the @callback function.
  */
-function checkConn(conf, callback) {
+function checkConnections(conf, callback) {
 	var options = {
-		// host: '192.168.0.16',
 		host: conf.server,
         port: conf.port,
         path: conf.rest + "/project",
@@ -41,6 +40,89 @@ function checkConn(conf, callback) {
 		callback(e);
 	});
 	req.end();
+}
+
+/*
+ * Check the Jira version
+ *
+ * TODO: Verify that the Jira version is supported
+ *	- needs to persist the serverInfo into server_info.json
+ */
+function checkJiraVersion(conf, callback) {
+	var repo = require('./repositories/jira');
+	var supported = repo.getSupportedVersions();
+
+	var options = {
+		host: conf.server,
+        port: conf.port,
+        path: conf.rest + "/serverInfo",
+        method: "GET",
+        auth: conf.username + ':' + conf.password,
+	};
+
+	var data = '';
+	conf.ajax.request(options, function(res) {
+		res.setEncoding('utf-8');
+		res.on('data', function(d) {
+			data += d;
+		});
+		res.on('end', function() {
+			var info = JSON.parse(data);
+			var version = info.version;
+
+			console.info(info);
+
+			if (true === supported.some(function(v) {
+				return v.test(version);
+			})) {
+				console.info('supported version, ' + version);
+
+				callback(null);
+			} else {
+				var e = new Error('not supported version, ' + version);
+				callback(e);
+			}
+		});
+	})
+	.on('error', function(e) {
+		e.server = conf.server;
+		e.port = conf.port;
+		e.path = options.path;
+
+		callback(e);
+	})
+	.end();
+}
+
+/*
+ * Check the repository version
+ */
+function checkVersions(conf, callback) {
+	if (conf.type === "jira") {
+		checkJiraVersion(conf, callback);
+	} else {
+		// The type of the repository is checked beforehand.
+		console.assert(false);
+	}
+}
+
+/*
+ * check the server
+ */
+function check(conf, callback) {
+	checkConnections(conf, function(err, results) {
+		if (err) {
+			callback(err);
+		}
+
+		checkVersions(conf, function(err, results) {
+			if (err) {
+				callback(err);
+			}
+
+			callback(null);
+		})
+	});
 }
 
 /*
@@ -85,14 +167,10 @@ function backup() {
 
 	/* run the backup */
 
-	checkConn(conf, function(err) {
+	check(conf, function(err) {
 		if (err) {
-			console.log('Access to the project in the issue repository is not verified.');
-			console.log(err);
-			return;
+			throw err;
 		}
-
-		console.log('Access to the project in the issue repository is verified.');
 
 		var scenario = new Scenario(conf, repo.getScenario(conf));
 		scenario.run(function(err, results) {

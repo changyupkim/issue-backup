@@ -1,4 +1,5 @@
 {
+    "type" : "jira",
 	"protocol" : "http",
 	"server" : "jira.duobase.org",
 	"port" : "",

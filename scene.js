@@ -218,7 +218,9 @@ Scene.prototype.run = function(callback) {
 		        res.on('end', function() {
 		        	var d = JSON.parse(results);
 
-		        	that.resources.push(that.desc.resources(d));
+		        	that.desc.resources(d).forEach(function(resource) {
+			        	that.resources.push(resource);
+		        	});
 
 		            if (--cnt === 0) {
 						console.log('End the scene, ' + that.id);

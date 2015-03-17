@@ -12,9 +12,12 @@
  * The @prevs has an array of the dependent scenes. The resources found in the dependent scens 
  * are utilized to construct the query in a scene.
  *
+ * @prevs : array of preceding scenes
  * @method : query method
- * @paths : array of URL paths
+ * @paths : array of URL paths to query in this scene
  * @data : post data
+ * @pre : pre-condition
+ * @post : post-condition
  * @resources : extracts the resources in the results of a single query
  */
 
@@ -28,10 +31,10 @@ function getScenario(conf) {
 			"pre" : [],
 			"post" : [],
 			"resources" : function(response) {
-				return {
+				return [{
 					"uri" : response.self,
 					"contents" : response
-				};
+				}];
 			}
 		},
 		"components" : {
@@ -53,10 +56,10 @@ function getScenario(conf) {
 			],
 			"post" : [],
 			"resources" : function(response) {
-				return {
+				return [{
 					"uri" : response.self,
 					"contents" : response
-				};
+				}];
 			}
 		},
 		"issues" : {
@@ -78,4 +81,12 @@ function getScenario(conf) {
 	};
 }
 
+function getSupportedVersions() {
+	var versions = [/5\..+\..+/, /6\..+\..+/];
+
+	return versions;
+}
+
+
 module.exports.getScenario = getScenario;
+module.exports.getSupportedVersions = getSupportedVersions;
