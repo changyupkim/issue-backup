@@ -8,11 +8,12 @@
  * Each resource is represented as this form
  *	{ uri: (String), content: (Object)}
  * 
- * To get all the resources in this scene, one must visit/query all the URLs in @paths.
- * To construct the URLs, it might need the resources in other scenes. The dependencies
+ * To get all the resources in this scene, one must visit/query all their URLs.
+ * The complete URLs are constructed with what @paths give.
+ * To locate the resources, it might need the resources in other scenes. The dependencies
  * are described in @prevs.
- * One could discover all the URLs at once as a priori. Or, they are discovered successively
- * by visiting an URL and computing the next URL with the results of the visit.
+ * One could discover all the locations at once as a priori. Or, they are discovered successively
+ * by visiting one location and use the results to concoct the next one.
  *
  * The @resouces function retrieves an array of resources from a query result.
  *
@@ -24,11 +25,11 @@
  *
  * @prevs : array of dependent scenes
  * @method : query method
- * @paths : URLs to query to get all the resources assocated with this scene
+ * @paths : paths to the resources assocated with this scene
  * @data : post data, available when @method is POST
  * @pre : pre-condition
  * @post : post-condition
- * @resources : a function to get an array of the resources from the results of a single query
+ * @resources : a function to retrieve an array of the resources from the results of a single query
  */
 
 function getScenario(conf) {

@@ -120,7 +120,6 @@ Scene.prototype.getUrl = function(response) {
 	return url;
 }
 
-
 /*
  * Visit the scene URLs chaining one after another
  */
@@ -143,8 +142,8 @@ Scene.prototype.chain = function(arg, callback) {
 				raw += d;
 			});
 			res.on('end', function() {
-				// save the resource in the response
 				var data = JSON.parse(raw);
+
 				that.desc.resources(data).forEach(function(resource) {
 		        	that.resources.push(resource);
 	        	});
@@ -214,13 +213,19 @@ Scene.prototype.iterate = function(callback) {
 /*
  * Run the scene under the scenario
  *
+ * It visits all the URLs for the scene.
+ *
  * This function is asynchronous. When the scene is played out, the @callback is invoked.
  * The 'result' parameter is the scene itself.
  *
+ * The two run modes are supported, Chain and Iterate.
+ * If all the URLs be constructed independently, visit them in an iteration mode.
+ * Or, if the resources are paginated, a chaining mode comes into play. Visit an URL and construct
+ * the next URL using the results of the visit.
+ * 
  * @param callback(err, result)
  * @return the result of the scene
  */
-
 Scene.prototype.run = function(callback) {
 	console.log('Run the scene, ' + this.id);
 
@@ -231,56 +236,6 @@ Scene.prototype.run = function(callback) {
 	} else {
 			this.iterate(callback);
 	}
-
-	return;
-
-	var urls = this.getUrls();
-
-	if (urls.length === 0) {
-		console.log('URLs = N/A');
-		callback(null, this);
-
-		// throw new Error();
-		// return;
-	} else {
-		console.log('URLs = ' + urls);
-
-		var nUrls = urls.length;
-
-		urls.forEach(function(url, i) {
-			console.log('query ' + url);
-
-			var options = URL.parse(url);
-			options.method = this.desc.method;
-			options.auth = this.conf.username + ':' + this.conf.password;
-
-			var that = this;
-		    var raw = '';
-		    
-		    that.conf.ajax.request(options, function(res) {
-		        res.setEncoding('utf-8');
-		        res.on('data', function(d) {
-		            raw += d;
-		        });
-		        res.on('end', function() {
-		        	var data = JSON.parse(raw);
-
-		        	that.desc.resources(data).forEach(function(resource) {
-			        	that.resources.push(resource);
-		        	});
-
-		            if (--nUrls === 0) {
-						console.log('End the scene, ' + that.id);
-			            callback(null, that);
-		        	}
-		        });
-		    })
-	 		.on('error', function(e) {
-		    	// throw e;
-		    	callback(e);
-		    })
-		    .end();
-		}, this);
-	}
 }
+
 module.exports = Scene;
