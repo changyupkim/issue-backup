@@ -51,6 +51,8 @@ Persistence.prototype.write = function(resources) {
 }
 
 Persistence.prototype.close = function() {
+	console.assert(this.fd !== null);
+
 	fs.writeSync(this.fd, ']');
 	fs.closeSync(this.fd);
 }
