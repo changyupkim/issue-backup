@@ -40,11 +40,7 @@ Persistence.prototype.write = function(resources) {
 		toWrite = ',' + toWrite;
 	}
 
-	console.log(toWrite);
-
 	var bytesWritten = fs.writeSync(this.fd, toWrite);
-
-	console.log('written ' + bytesWritten);
 
 	this.nBytes += bytesWritten;
 	this.nResources += resources.length;

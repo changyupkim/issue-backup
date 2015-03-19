@@ -25,11 +25,6 @@ function Scene(conf, scenario, id, description) {
 
 	// persistence
 	this.persistence = new Persistence(conf, id);
-
-	// this.fd = null;
-	// this.fpath = path.join(conf.dest, id);
-	// fs.open(fpath, 'w');
-
 }
 
 /*
@@ -139,8 +134,6 @@ Scene.prototype.chain = function(arg, callback) {
 
 	console.log('chain : ' + url);
 
-	// this.persistence.open();
-
 	if (url) {
 		var that = this;
 
@@ -168,12 +161,10 @@ Scene.prototype.chain = function(arg, callback) {
 			});
 		})
 		.on('error', function(e) {
-			// that.persistence.close();
 			callback(e);
 		})
 		.end();
 	} else {
-		// this.persistence.close();
 		callback(null, this);
 	}
 }
@@ -183,8 +174,6 @@ Scene.prototype.chain = function(arg, callback) {
  */
 Scene.prototype.iterate = function(callback) {
 	var urls = this.getUrls();
-
-	// this.persistence.open();
 
 	if (urls.length === 0) {
 		console.log('URLs = N/A');
@@ -216,17 +205,12 @@ Scene.prototype.iterate = function(callback) {
 		        	var data = JSON.parse(raw);
 
 		        	var resources = that.desc.resources(data);
-		        	// resources.forEach(function(resource) {
-			        // 	that.resources.push(resource);
-		        	// });
 		        	that.resources.push.apply(that.resources, resources);
 
 		        	that.persistence.write(resources);
 
 		            if (--nUrls === 0) {
 						console.log('End the scene, ' + that.id);
-
-						// that.persistence.close();
 			            callback(null, that);
 		        	}
 		        });
@@ -258,7 +242,6 @@ Scene.prototype.iterate = function(callback) {
 Scene.prototype.run = function(callback) {
 	console.log('Run the scene, ' + this.id);
 
-	// different run modes
 	var that = this;
 
 	if (typeof this.desc.paths === 'function'
