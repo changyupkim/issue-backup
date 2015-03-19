@@ -7,6 +7,9 @@
  */
 var http = require('http');
 var URL = require('url');
+var path = require('path');
+var fs = require('fs');
+var Persistence = require('./persistence');
 
 function Scene(conf, scenario, id, description) {
 	this.conf = conf;
@@ -19,6 +22,14 @@ function Scene(conf, scenario, id, description) {
 	// digraph representation as a adjacency list
 	this.edges = [];
 	this.visited = false;
+
+	// persistence
+	this.persistence = new Persistence(conf, id);
+
+	// this.fd = null;
+	// this.fpath = path.join(conf.dest, id);
+	// fs.open(fpath, 'w');
+
 }
 
 /*
@@ -128,6 +139,8 @@ Scene.prototype.chain = function(arg, callback) {
 
 	console.log('chain : ' + url);
 
+	// this.persistence.open();
+
 	if (url) {
 		var that = this;
 
@@ -144,18 +157,23 @@ Scene.prototype.chain = function(arg, callback) {
 			res.on('end', function() {
 				var data = JSON.parse(raw);
 
-				that.desc.resources(data).forEach(function(resource) {
+				var resources = that.desc.resources(data);
+				resources.forEach(function(resource) {
 		        	that.resources.push(resource);
 	        	});
+
+				that.persistence.write(resources);
 
 				that.chain(data, callback);
 			});
 		})
 		.on('error', function(e) {
+			// that.persistence.close();
 			callback(e);
 		})
 		.end();
 	} else {
+		// this.persistence.close();
 		callback(null, this);
 	}
 }
@@ -166,13 +184,18 @@ Scene.prototype.chain = function(arg, callback) {
 Scene.prototype.iterate = function(callback) {
 	var urls = this.getUrls();
 
+	// this.persistence.open();
+
 	if (urls.length === 0) {
 		console.log('URLs = N/A');
+
+		this.persistence.close();
 		callback(null, this);
 	} else {
 		console.log('URLs = ' + urls);
 
 		var nUrls = urls.length;
+		var nWrittenResources = 0;
 
 		urls.forEach(function(url, i) {
 			console.log('query ' + url);
@@ -192,12 +215,18 @@ Scene.prototype.iterate = function(callback) {
 		        res.on('end', function() {
 		        	var data = JSON.parse(raw);
 
-		        	that.desc.resources(data).forEach(function(resource) {
-			        	that.resources.push(resource);
-		        	});
+		        	var resources = that.desc.resources(data);
+		        	// resources.forEach(function(resource) {
+			        // 	that.resources.push(resource);
+		        	// });
+		        	that.resources.push.apply(that.resources, resources);
+
+		        	that.persistence.write(resources);
 
 		            if (--nUrls === 0) {
 						console.log('End the scene, ' + that.id);
+
+						// that.persistence.close();
 			            callback(null, that);
 		        	}
 		        });
@@ -230,11 +259,23 @@ Scene.prototype.run = function(callback) {
 	console.log('Run the scene, ' + this.id);
 
 	// different run modes
+	var that = this;
+
 	if (typeof this.desc.paths === 'function'
 		&& this.desc.paths.length > this.desc.prevs.length) {
-			this.chain(null, callback);
+		this.persistence.open();
+
+		this.chain(null, function(err, res) {
+			that.persistence.close();
+			callback(err, res);
+		});
 	} else {
-			this.iterate(callback);
+		this.persistence.open();
+
+		this.iterate(function(err, res) {
+			that.persistence.close();
+			callback(err, res);
+		});
 	}
 }
 
