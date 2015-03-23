@@ -7,7 +7,7 @@ A user can download issue data from an issue repository.
 
 The issue management plays a critical role in managing a project. Various kinds of issue repositories are present and used.
 
-One can download the issues posted into a proejct. 
+One can download the issues posted into a project for later use.
 
 
 # Terms
@@ -34,7 +34,7 @@ Download this code base. And type in the following command.
 - FILE is the configuration file (.json) in which a user sets up the repository and project to back up. See the 'Configuration file' section of this document for the details.
 - DEST is the local filesystem directory to which the data in the repository is stored.
 
-For example, the backup target is configured in 'config_jira_projA.json'. And the backup artifacts will be foud under the './jira_projA' directory.
+For example, the backup target is configured in 'config_jira_projA.json'. And the backup artifacts will be found under the './jira_projA' directory.
 
 > node.js backup.js -f config_jira_projA.json ./jira_projA
 
