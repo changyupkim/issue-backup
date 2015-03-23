@@ -1,0 +1,10 @@
+{
+    "type" : "jira",
+	"protocol" : "http",
+	"server" : "jira.myserver.org",
+	"port" : "",
+	"rest" : "/rest/api/latest",
+	"username" : "scott",
+	"password" : "tiger",
+	"project" : "MYPROJECT"
+}
