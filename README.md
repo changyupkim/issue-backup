@@ -86,3 +86,15 @@ Please report me if you've found something.
 # Internals
 
 For the details, see the wiki documents in https://github.com/changyupkim/issue-backup/wiki.
+
+# License
+
+[MIT](LICENSE)
+
+# Author
+
+Changyup Kim
+
+# Changlogs
+
+### 0.1.0 (initial)
