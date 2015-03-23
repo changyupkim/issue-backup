@@ -73,9 +73,9 @@ function checkJiraVersion(conf, callback) {
 
 			conf.debug && console.log({url : options.path, contents : info});
 
-			if (true === supported.some(function(v) {
-				return v.test(version);
-			})) {
+			// if (true === supported.some(function(v) {
+			// 	return v.test(version);
+			// })) {
 				var fpath = path.join(conf.dest, 'server_info.json');
 				var fd = fs.openSync(fpath, 'w');
 				if (fd < 0) {
@@ -89,10 +89,10 @@ function checkJiraVersion(conf, callback) {
 
 					callback(null);
 				}
-			} else {
-				var e = new Error('not supported version, ' + version);
-				callback(e);
-			}
+			// } else {
+			// 	var e = new Error('not supported version, ' + version);
+			// 	callback(e);
+			// }
 		});
 	})
 	.on('error', function(e) {
