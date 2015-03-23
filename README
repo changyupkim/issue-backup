@@ -7,7 +7,7 @@ A user can download issue data from an issue repository.
 
 The issue management plays a critical role in managing a project. Various kinds of issue repositories are present and used.
 
-One can download the issues posted into the proejct. 
+One can download the issues posted into a proejct. 
 
 
 # Terms
@@ -31,8 +31,8 @@ Download this code base. And type in the following command.
 
 > node.js backup.js -f FILE DEST
 
-FILE is the configuration file in which a user sets up the repository and project to back up.
-DEST is the local filesystem directory to which the data in the repository is stored.
+- FILE is the configuration file (.json) in which a user sets up the repository and project to back up.
+- DEST is the local filesystem directory to which the data in the repository is stored.
 
 
 # Configuration file
@@ -43,8 +43,7 @@ As in the 'config_example.json', it's a JSON file with the '.json' file extensio
 
 The configuration items are as follows.
 
-- type : a type of the repository like 'jira', 'bitbucket', 'github', 'trac', 'redmine', etc.
-		Currently, 'jira' is only valid.
+- type : a type of the repository like 'jira', 'bitbucket', 'github', 'trac', 'redmine', etc. Currently, 'jira' is only the valid value.
 - protocol : 'http' or 'https'
 - server : host name or IP address of the repository
 - port : port number of the repository
