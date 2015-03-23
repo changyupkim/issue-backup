@@ -70,7 +70,6 @@ Scene.prototype.getUrls = function() {
 		var args = this.getPreviousScenes().map(function(scene) {
 			return scene.resources;
 		});
-		console.log(args);
 
 		paths = this.desc.paths.apply(null, args);
 	} else if (this.desc.paths instanceof Array) {
@@ -127,20 +126,22 @@ Scene.prototype.getUrl = function(response) {
 }
 
 /*
- * Visit the scene URLs chaining one after another
+ * Query the URL and get the next URL from the results successivley
+ *
+ * This run mode is appropriate to query the paginated resources for the scene.
  */
 Scene.prototype.chain = function(arg, callback) {
 	var url = this.getUrl(arg);
 
-	console.log('chain : ' + url);
-
 	if (url) {
-		var that = this;
-
 		var options = URL.parse(url);
 		options.method = this.desc.method;
 		options.auth = this.conf.username + ':' + this.conf.password;
 
+		this.conf.debug &&
+			console.log('at the chain, %s, in the scene', options.path);
+
+		var that = this;
 		this.conf.ajax.request(options, function(res) {
 			var raw = '';
 
@@ -149,6 +150,9 @@ Scene.prototype.chain = function(arg, callback) {
 			});
 			res.on('end', function() {
 				var data = JSON.parse(raw);
+
+				that.conf.debug &&
+		        		console.log({url: options.path, contents: data});
 
 				var resources = that.desc.resources(data);
 				resources.forEach(function(resource) {
@@ -165,30 +169,30 @@ Scene.prototype.chain = function(arg, callback) {
 		})
 		.end();
 	} else {
+		this.conf.debug &&
+			console.log('at the end of chain in the scene');
+
 		callback(null, this);
 	}
 }
 
 /*
- * Visit the scene URLs one by one independently
+ * Get all the URLs for the scene and query them independently
  */
 Scene.prototype.iterate = function(callback) {
 	var urls = this.getUrls();
 
-	if (urls.length === 0) {
-		console.log('URLs = N/A');
+	this.conf.debug &&
+		console.log('iterate %d url(s) in the scene', urls.length);
 
+	if (urls.length === 0) {
 		this.persistence.close();
 		callback(null, this);
 	} else {
-		console.log('URLs = ' + urls);
-
 		var nUrls = urls.length;
 		var nWrittenResources = 0;
 
 		urls.forEach(function(url, i) {
-			console.log('query ' + url);
-
 			var options = URL.parse(url);
 			options.method = this.desc.method;
 			options.auth = this.conf.username + ':' + this.conf.password;
@@ -204,13 +208,15 @@ Scene.prototype.iterate = function(callback) {
 		        res.on('end', function() {
 		        	var data = JSON.parse(raw);
 
+		        	that.conf.debug &&
+		        		console.log({url: options.path, contents: data});
+
 		        	var resources = that.desc.resources(data);
 		        	that.resources.push.apply(that.resources, resources);
 
 		        	that.persistence.write(resources);
 
 		            if (--nUrls === 0) {
-						console.log('End the scene, ' + that.id);
 			            callback(null, that);
 		        	}
 		        });
@@ -234,13 +240,13 @@ Scene.prototype.iterate = function(callback) {
  * The two run modes are supported, Chain and Iterate.
  * If all the URLs be constructed independently, visit them in an iteration mode.
  * Or, if the resources are paginated, a chaining mode comes into play. Visit an URL and construct
- * the next URL using the results of the visit.
+ * the next URL using the results of the previous visit.
  * 
  * @param callback(err, result)
  * @return the result of the scene
  */
 Scene.prototype.run = function(callback) {
-	console.log('Run the scene, ' + this.id);
+	console.log('run the scene, ' + this.id);
 
 	var that = this;
 

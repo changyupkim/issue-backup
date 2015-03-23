@@ -42,18 +42,14 @@
 		var results = [];
 		var queue = from.slice();
 
-		// console.log('traversal queue length = ' + queue.length);
 		console.assert(queue.length > 0);
 
 		var scene = queue.shift();
-		// console.log('queue lenth = ' + queue.length);
 		
 		visit(scene, function cb(err, result) {
 			if (err) {
 				throw err;
 			}
-
-			console.log('The scene, ' + result.id + ', is done.');
 
 			result.resources.forEach(function(resource) {
 				results.push(resource);
@@ -70,13 +66,10 @@
 				}
 			});
 
-			console.log(queue.length);
-
 			if (queue.length > 0) {
 				var next = queue.shift();
 				visit(next, cb);
 			} else {
-				console.log('No more scene is left in the queue.');
 				callback(err, results);
 			}
 		});

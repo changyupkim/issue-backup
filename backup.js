@@ -3,7 +3,6 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var GetOpt = require('node-getopt');
-
 var Scenario = require('./scenario');
 
 /*
@@ -72,21 +71,19 @@ function checkJiraVersion(conf, callback) {
 			var info = JSON.parse(data);
 			var version = info.version;
 
-			console.info(info);
+			conf.debug && console.log({url : options.path, contents : info});
 
 			if (true === supported.some(function(v) {
 				return v.test(version);
 			})) {
-				console.info('supported version, ' + version);
-
 				var fpath = path.join(conf.dest, 'server_info.json');
-				console.info(fpath);
-
 				var fd = fs.openSync(fpath, 'w');
 				if (fd < 0) {
 					var e = new Error('could not open, ' + fpath);
 					callback(e);
 				} else {
+					console.log('write the server information to %s', fpath);
+
 					fs.writeSync(fd, data);
 					fs.closeSync(fd);
 
@@ -152,6 +149,7 @@ function backup() {
 
 	var getopt = new GetOpt([
 		['f', '=', 'configuration file'],
+		['d', '', 'debug mode'],
 		['h', '', 'display this help']
 	]);
 
@@ -170,7 +168,7 @@ function backup() {
 
 	var opt = getopt.parseSystem();
 
-	if (opt.options.f === true) {
+	if (opt.options.h === true) {
 		getopt.showHelp();
 
 		return 0;
@@ -196,10 +194,16 @@ function backup() {
 	} catch(e) {
 		if (e.code === 'EEXIST') {
 			console.assert(fs.statSync(dest).isDirectory(),
-				'The DEST should be a directory');
+				'The DEST, %s, should be a directory.', dest);
 		} else {
 			throw(e);
 		}
+	}
+
+	if (opt.options.d === true) {
+		conf.debug = true;
+	} else {
+		conf.debug = false;
 	}
 
 	/* configure */
@@ -208,13 +212,12 @@ function backup() {
 
 	switch(conf.type) {
 	case 'jira':
-		repo = require('./repositories/jira');
 		break;
 	default :
 		console.assert(false, 'unsupported repository type, ' + conf.type);
 	}
 
-	console.log("Back up the " + conf.project + ' project');
+	console.log("back up the " + conf.project + ' project');
 
 	if (conf.protocol === 'http') {
 		conf.ajax = http;
@@ -222,7 +225,7 @@ function backup() {
 		conf.ajax = https;
 	} else {
 		console.error(conf.protocol + ' is not a supported protocol.');
-		return;
+		return 1;
 	}
 
 	/* run the backup */
@@ -232,14 +235,14 @@ function backup() {
 			throw err;
 		}
 
-		var scenario = new Scenario(conf, repo.getScenario(conf));
+		var scenario = new Scenario(conf);
 		scenario.run(function(err, results) {
 			if (err) {
 				throw err;
 			}
 
 			console.log('Backup is done.');
-			console.log(results);
+			// conf.debug && console.log(results);
 		});
 	});
 }

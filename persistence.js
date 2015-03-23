@@ -9,6 +9,7 @@ var fs = require('fs');
  * @param scene ID of a scene
  */
 function Persistence(conf, scene) {
+	this.conf = conf;
 	this.path = path.join(conf.dest, scene);
 	this.fd = null;
 	this.nResources = 0;
@@ -26,6 +27,8 @@ Persistence.prototype.open = function() {
  * @param resources array of resources
  */
 Persistence.prototype.write = function(resources) {
+	console.log('write %d resource(s) to %s', resources.length, this.path);
+	
 	console.assert(resources.length > 0, 'nothing to write');
 
 	var toWrite = JSON.stringify(resources);
@@ -35,7 +38,6 @@ Persistence.prototype.write = function(resources) {
 
 	toWrite = toWrite.substring(toWrite.indexOf('[') + 1, toWrite.lastIndexOf(']'));
 
-	console.info(this.path + ': ' + this.nResources);
 	if (this.nResources > 0) {
 		toWrite = ',' + toWrite;
 	}

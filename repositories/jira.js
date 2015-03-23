@@ -82,7 +82,7 @@ function getScenario(conf) {
 					if ((response.startAt + response.maxResults) < response.total) {
 						path = path + "&startAt=" + (response.startAt + response.maxResults);
 					} else {
-						// It was the last page.
+						// last page
 						path = null;
 					}
 				}

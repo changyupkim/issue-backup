@@ -7,8 +7,12 @@
 var Scene = require('./scene');
 var SceneGraph = require('./sceneGraph');
 
-function Scenario(conf, scenario) {
+function Scenario(conf) {
 	this.conf = conf;
+
+	var repo = require('./repositories/' + conf.type);
+	var scenario = repo.getScenario(conf); 
+
 	this.scenes = loadScenes.call(this, scenario);
 	this.sceneGraph = new SceneGraph(conf, this.scenes);
 
@@ -30,8 +34,6 @@ function Scenario(conf, scenario) {
 
 		// construct the scene objects
 		for (var sceneId in scenario) {
-			// console.log('Load the scene, ' + sceneId);
-
 			var scene = new Scene(this.conf, this, sceneId, scenario[sceneId]);
 			scenes.push(scene);
 		}
@@ -43,7 +45,8 @@ function Scenario(conf, scenario) {
 			});
 		});
 
-		console.log(scenes.length + ' scenes are loaded.');
+		this.conf.debug &&
+			console.log('The %d scenes are loaded from the scenario.', scenes.length);
 
 		return scenes;
 	}
@@ -68,17 +71,13 @@ function Scenario(conf, scenario) {
 	 * run the scenario
 	 */
 	this.run = function(callback) {
-		console.log('Run the scenario');
+		console.log('run the scenario');
 
 		var from = getIndependentScenes(this.scenes);
 
 		this.sceneGraph.traverse(from, function(scene, _callback) {
-			console.log('Visit the scene, ' + scene.id);
-
 			scene.run(_callback);
 		}, function(err, results) {
-			console.log('End the traversal');
-			
 			callback(err, results);
 		});
 	}
