@@ -160,9 +160,11 @@ function backup() {
 		+ "\t\tIt should be present to run the backup.\n"
 		+ "\tOPTIONS\n"
 		+ "\t\t-f FILE, configuration file\n"
+		+ "\t\t-d, print debug messages\n"
 		+ "\t\t-h, display this help\n"
 		+ "\tEXAMPLES\n"
 		+ "\t\tnode backup.js -f config.json backup\n"
+		+ "\t\tnode backup.js -f config.json -d backup\n"
 		+ "\t\tnode backup.js -h\n"
 	);
 
