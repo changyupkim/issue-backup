@@ -1,12 +1,11 @@
+var Scene = require('./scene');
+var SceneGraph = require('./sceneGraph');
+
 /*
  * Scenario, Scenario controller/manager
  *
  * - repository specific
  */
-
-var Scene = require('./scene');
-var SceneGraph = require('./sceneGraph');
-
 function Scenario(conf) {
 	this.conf = conf;
 

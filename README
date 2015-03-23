@@ -1,88 +1,78 @@
+# The issue backup utility
+
+A user can download issue data from an issue repository. 
+
+
+# Purposes
+
+The issue management plays a critical role in managing a project. Various kinds of issue repositories are present and used.
+
+One can download the issues posted into the proejct. 
+
+
+# Terms
+
+- (issue) repository : issue management system. Jira, BitBucket, GitHub, Trac, Redmine, etc.
+- project : A repository usually hosts mulitple projects. A user posts an issue for a project.
+
+
+# Features
+
+- A user can download the issue data of a project in a repository.
+- A user need not have an admistrator's account to the repository. Only the read access to the repository/proejct is required.
+- This program runs in the node.js environment.
+- The backup copies are saved onto the local files in JSON format.
+- The issue data is retrieved from the repository via its REST APIs.
+
+
+# Usages
+
+Download this code base. And type in the following command.
+
+> node.js backup.js -f FILE DEST
+
+FILE is the configuration file in which a user sets up the repository and project to back up.
+DEST is the local filesystem directory to which the data in the repository is stored.
+
+
+# Configuration file
+
+A user need to give information on the repository and project to back up. 
+
+As in the 'config_example.json', it's a JSON file with the '.json' file extension.
+
+The configuration items are as follows.
+
+- type : a type of the repository like 'jira', 'bitbucket', 'github', 'trac', 'redmine', etc.
+		Currently, 'jira' is only valid.
+- protocol : 'http' or 'https'
+- server : host name or IP address of the repository
+- port : port number of the repository
+- rest : path to the REST API of the repository
+- username : user name of an account to the repository
+- password : password of an account to the repository
+- project : project ID
+
+
+# Debugging and reporting
+
+When something went wrong, run the backup in the debug mode.
+
+> node.js backup.js -f FILE -d DEST
+
+Capture the logs and report the issue in https://github.com/changyupkim/issue-backup/issues.
+
+
 # Supported repositories
 
+Currently, Jira is supported and tested against these versions only.
 
-# The Jira backup utility
+- 5.0.5
+- 6.3.13
 
-- This utility is to backup a project hosted in a Jira repository.
-- Assume that this utility has a limited access right such as Jira devloper or user, not as Jira administrator.
-- This utility is written in Javascript so that it could be well integrated with iOrg code base.
+Please report me if you've found something.
 
-# Architecture design
 
-This utility retrieves the data in the Jira instance via its REST APIs.
-The REST APIs are called based on a scenario.
-A resource or the same type of resources are represented by a scene.
-The scenario is a collection of scenes. A scene is composed of the scene identifier and scene description.
-The description has the properties.
+# Internals
 
-* prev : array of previous scenes that must come before this scene
-* method : HTTP verb
-* api : REST API
-* params : query parameters to the REST API
-* pre : precondition, The scene is played only when the precondion is true.
-* post : postcondition, The next scenes are not loaded if the postcondion is not met.
-
-For example, the scenes, 'project' and 'components', are serialized. The 'apis' in a scene can be executed in parallel.
-
-{
-	"project" : {
-		"prevs" : [],
-		"method" : "GET",
-		"apis" : ["/project/KEY"],
-		"params" : [""]
-	},
-	"components" : {
-		"prevs" : ["project"],
-		"method" : "GET",
-		"apis" : function(project) {
-			project.components.map(function(elm) {
-				return "/component/" + elm.id;
-			})
-		}
-		"params" : function(project) {
-			project.components.map(function(elm) {
-				return "";
-			})
-		}
-	}
-}
-
-Construct the sequence of scenes, plot, referring to the dependencies among the scenes. The plot is backed by the data structure, directed graph.
-
-The plot is played in a bread-first manner.
-
-The output of each scene is structured as
-
-{
-	uri : resource data
-}
-
-For example,
-
-{
-	"http://localhost/rest/api/latest/project" : {
-		...
-	},
-	"http://localhost/res/api/latest/search?jql=project=FOO" : {
-		...
-	}
-}
-
-## Scene graph
-
-It's a directed graph, digraph.
-A vertex in a graph represents a scene.
-
-	{
-		id: ID of the referring scene
-		edges: array of seccessor vertices
-		data: ad-hoc data when traversing the graph
-	}
-
-# Synchronization library
-
-Use of a flow control library.
-
-- synchronize.js
-- node-seq
-- node-sync
+For the details, see the wiki documents in https://github.com/changyupkim/issue-backup/wiki.

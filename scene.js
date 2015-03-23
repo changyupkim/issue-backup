@@ -17,7 +17,8 @@ function Scene(conf, scenario, id, description) {
 
 	this.id = id;
 	this.desc = description;
-	this.resources = []; //{};
+	this.resources = []; // resources cache
+		//TODO: cache management
 
 	// digraph representation as a adjacency list
 	this.edges = [];

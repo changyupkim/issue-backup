@@ -5,8 +5,8 @@ var fs = require('fs');
 var GetOpt = require('node-getopt');
 var Scenario = require('./scenario');
 
-/*
- * Check the connection
+/**
+ * Check the connection to the repository
  *
  * @param callback(Error e)
  * @return Any error is returned to its caller via the @callback function.
@@ -43,11 +43,8 @@ function checkConnections(conf, callback) {
 	req.end();
 }
 
-/*
- * Check the Jira version
- *
- * TODO: Verify that the Jira version is supported
- *	- needs to persist the serverInfo into server_info.json
+/**
+ Checks the Jira version
  */
 function checkJiraVersion(conf, callback) {
 	var repo = require('./repositories/jira');
@@ -72,6 +69,9 @@ function checkJiraVersion(conf, callback) {
 			var version = info.version;
 
 			conf.debug && console.log({url : options.path, contents : info});
+
+			//NOTE: The 'supported' is actually the list of tested versions.
+			// If the repo is not on the list, just keep going.
 
 			// if (true === supported.some(function(v) {
 			// 	return v.test(version);
@@ -105,8 +105,8 @@ function checkJiraVersion(conf, callback) {
 	.end();
 }
 
-/*
- * Check the repository version
+/**
+ Checks the type and version of the repository
  */
 function checkVersions(conf, callback) {
 	if (conf.type === "jira") {
@@ -117,8 +117,8 @@ function checkVersions(conf, callback) {
 	}
 }
 
-/*
- * check the server
+/**
+ Checks the server (repository) if it's a proper target for backup
  */
 function check(conf, callback) {
 	checkConnections(conf, function(err, results) {
@@ -132,13 +132,12 @@ function check(conf, callback) {
 			}
 
 			callback(null);
-		})
+		});
 	});
 }
 
-/*
- * usage:
- *	node backup -c <configuration file> DEST
+/**
+ * main routine
  */
 function backup() {
 	var conf,
