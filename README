@@ -18,7 +18,7 @@ One can download the issues posted into a proejct.
 
 # Features
 
-- A user can download the issue data of a project in a repository.
+- A user can download the project's issue data from a repository.
 - A user need not have an admistrator's account to the repository. Only the read access to the repository/proejct is required.
 - This program runs in the node.js environment.
 - The backup copies are saved onto the local files in JSON format.
