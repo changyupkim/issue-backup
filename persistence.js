@@ -10,7 +10,7 @@ var fs = require('fs');
  */
 function Persistence(conf, scene) {
 	this.conf = conf;
-	this.path = path.join(conf.dest, scene);
+	this.path = path.join(conf.dest, scene + '.json');
 	this.fd = null;
 	this.nResources = 0;
 	this.nBytes = 0;
@@ -28,7 +28,7 @@ Persistence.prototype.open = function() {
  */
 Persistence.prototype.write = function(resources) {
 	console.log('write %d resource(s) to %s', resources.length, this.path);
-	
+
 	console.assert(resources.length > 0, 'nothing to write');
 
 	var toWrite = JSON.stringify(resources);
