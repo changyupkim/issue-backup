@@ -72,9 +72,6 @@ function Scenario(conf, scenario) {
 
 		var from = getIndependentScenes(this.scenes);
 
-		// from[0].run();
-		// return;
-
 		this.sceneGraph.traverse(from, function(scene, _callback) {
 			console.log('Visit the scene, ' + scene.id);
 

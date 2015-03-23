@@ -151,7 +151,7 @@ function backup() {
 	/* parse the command line */
 
 	var getopt = new GetOpt([
-		['c', '=', 'configuration file'],
+		['f', '=', 'configuration file'],
 		['h', '', 'display this help']
 	]);
 
@@ -161,29 +161,46 @@ function backup() {
 		+ "\t\tdestination directory in the local filesystem where the backup copies are saved."
 		+ "\t\tIt should be present to run the backup.\n"
 		+ "\tOPTIONS\n"
-		+ "\t\t-c FILE, configuration file (mandatory)\n"
+		+ "\t\t-f FILE, configuration file\n"
 		+ "\t\t-h, display this help\n"
 		+ "\tEXAMPLES\n"
-		+ "\t\tnode backup.js -c config.json backup\n"
+		+ "\t\tnode backup.js -f config.json backup\n"
 		+ "\t\tnode backup.js -h\n"
 	);
 
 	var opt = getopt.parseSystem();
 
-	if (opt.options.h === true) {
+	if (opt.options.f === true) {
 		getopt.showHelp();
 
 		return 0;
 	}
 
-	if (!opt.options.c || opt.argv.length !== 1) {
+	if (!opt.options.f || opt.argv.length !== 1) {
 		getopt.showHelp();
 
 		return 1;
 	}
 
-	conf = require(path.resolve(opt.options.c));
+	/* preprocess the command options */
+
+	try {
+		conf = require(path.resolve(opt.options.f));
+	} catch(e) {
+		throw(e);
+	}
+
 	dest = path.resolve(opt.argv[0]);
+	try {
+		fs.mkdirSync(dest);
+	} catch(e) {
+		if (e.code === 'EEXIST') {
+			console.assert(fs.statSync(dest).isDirectory(),
+				'The DEST should be a directory');
+		} else {
+			throw(e);
+		}
+	}
 
 	/* configure */
 
