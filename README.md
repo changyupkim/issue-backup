@@ -111,6 +111,7 @@ Capture the logs and report the issue in https://github.com/changyupkim/issue-ba
 Currently, Jira is supported and tested against these versions only.
 
 - 5.0.5
+- 6.3.4
 - 6.3.13
 
 Please report me if you've found something.
