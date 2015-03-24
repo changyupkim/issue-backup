@@ -34,7 +34,7 @@ Download this code base. And type in the following command.
 - FILE is the configuration file (.json) in which a user sets up the repository and project to back up. See the 'Configuration file' section of this document for the details.
 - DEST is the local filesystem directory to which the data from the repository is stored.
 
-For example, the backup target is configured in __config_jira_projA.json__. And the backup artifacts will be found under the './jira_projA' directory.
+For example, the backup target is configured in _config_jira_projA.json_. And the backup artifacts will be found under the _./jira_projA_ directory.
 
 > node backup -f config_jira_projA.json ./jira_projA
 
@@ -68,7 +68,7 @@ DEST/
 
 When something went wrong, run the backup in the debug mode.
 
-> node.js backup.js -f __FILE__ -d __DEST__
+> node.js backup.js -f _FILE_ -d _DEST_
 
 Capture the logs and report the issue in https://github.com/changyupkim/issue-backup/issues.
 
