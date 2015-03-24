@@ -56,7 +56,7 @@ The configuration items are as follows.
 - password : password of an account to the repository (Optional)
 - project : project ID
 
-If no authentication is required to use the REST APIs, the _username_ and _password_.
+If no authentication is required to use the REST APIs, you don't need to set the _username_ and _password_.
 
 For example, the configuration file for the Apache Spark project looks as
 
@@ -65,7 +65,7 @@ For example, the configuration file for the Apache Spark project looks as
 	type : 'jira',
 	protocol : 'https',
 	server : 'issues.apache.org',
-	rest : '/rest/api/latest/',
+	rest : '/jira/rest/api/latest/',
 	project : 'SPARK'
 }
 ```

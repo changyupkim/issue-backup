@@ -137,7 +137,7 @@ Scene.prototype.chain = function(arg, callback) {
 	if (url) {
 		var options = URL.parse(url);
 		options.method = this.desc.method;
-		options.auth = this.conf.username + ':' + this.conf.password;
+		options.auth = this.conf.username && this.conf.username + ':' + this.conf.password;
 
 		this.conf.debug &&
 			console.log('at the chain, %s, in the scene', options.path);
@@ -196,7 +196,7 @@ Scene.prototype.iterate = function(callback) {
 		urls.forEach(function(url, i) {
 			var options = URL.parse(url);
 			options.method = this.desc.method;
-			options.auth = this.conf.username + ':' + this.conf.password;
+			options.auth = this.conf.username && this.conf.username + ':' + this.conf.password;
 
 			var that = this;
 		    var raw = '';

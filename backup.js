@@ -17,7 +17,7 @@ function checkConnections(conf, callback) {
         port: conf.port,
         path: conf.rest + "/project",
         method: "HEAD",
-        auth: conf.username + ':' + conf.password,
+        auth: conf.username && conf.username + ':' + conf.password
 	};
 
 	var req = conf.ajax.request(options, function(res) {
@@ -55,7 +55,7 @@ function checkJiraVersion(conf, callback) {
         port: conf.port,
         path: conf.rest + "/serverInfo",
         method: "GET",
-        auth: conf.username + ':' + conf.password,
+        auth: conf.username && conf.username + ':' + conf.password
 	};
 
 	var data = '';
@@ -233,12 +233,14 @@ function backup() {
 
 	check(conf, function(err) {
 		if (err) {
+			console.error(err);
 			throw err;
 		}
 
 		var scenario = new Scenario(conf);
 		scenario.run(function(err, results) {
 			if (err) {
+				console.error(err);
 				throw err;
 			}
 
