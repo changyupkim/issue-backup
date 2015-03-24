@@ -60,14 +60,15 @@ If no authentication is required to use the REST APIs, the _username_ and _passw
 
 For example, the configuration file for the Apache Spark project looks as
 
-> {
+```
+{
 	type : 'jira',
 	protocol : 'https',
 	server : 'issues.apache.org',
 	rest : '/rest/api/latest/',
 	project : 'SPARK'
 }
-
+```
 
 # Output
 
