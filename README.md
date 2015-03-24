@@ -70,12 +70,32 @@ For example, the configuration file for the Apache Spark project looks as this. 
 }
 ```
 
+
 # Output
 
-Once the backup is done. You can see the files under the DEST directory.
+Once the backup is done, you can see the files under the DEST directory.
 
+The files are formated in JSON. They contains different types of data - backup statistics, backup metadata, repository data, project data, and so on. Each file holds specific type of data.
+
+
+```
 DEST/
-	
+	server_info.json
+	project.json
+	issues.json
+	component.json
+	...
+```
+
+Some of the files contain an array of resources which are retrieved from the repository. A single resource is structured as this.
+
+```
+{
+	url : (URL of the resource/data),
+	contents : (data queried againt the URL)
+}
+```
+
 
 # Debugging and reporting
 
