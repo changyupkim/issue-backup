@@ -29,14 +29,14 @@ One can download all the data of a project.
 
 Download this code base. And type in the following command.
 
-> node backup -f FILE DEST
+> node backup -f _FILE_ _DEST_
 
 - FILE is the configuration file (.json) in which a user sets up the repository and project to back up. See the 'Configuration file' section of this document for the details.
 - DEST is the local filesystem directory to which the data from the repository is stored.
 
 For example, the backup target is configured in _config_jira_projA.json_. And the backup artifacts will be found under the _./jira_projA_ directory.
 
-> node backup -f config_jira_projA.json ./jira_projA
+> node backup -f _config_jira_projA.json_ _./jira_projA_
 
 
 # Configuration file
