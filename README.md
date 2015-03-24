@@ -58,7 +58,7 @@ The configuration items are as follows.
 
 If no authentication is required to use the REST APIs, you don't need to set the _username_ and _password_.
 
-For example, the configuration file for the Apache Spark project looks as
+For example, the configuration file for the Apache Spark project looks as this. No authentication is required to access the REST API.
 
 ```
 {
