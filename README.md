@@ -98,3 +98,4 @@ Changyup Kim
 # Changlogs
 
 ### 0.1.0 (initial)
+* The new resources includes server info, issues, project and components.
