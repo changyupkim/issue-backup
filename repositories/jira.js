@@ -27,8 +27,6 @@
  * @method : query method
  * @paths : paths to the resources assocated with this scene
  * @data : post data, available when @method is POST
- * @pre : pre-condition
- * @post : post-condition
  * @resources : a function to retrieve an array of the resources from the results of a single query
  */
 
@@ -39,8 +37,6 @@ function getScenario(conf) {
 			"method" : "GET",
 			"paths" : ["/project/" + conf.project],
 			"data" : [""],
-			"pre" : [],
-			"post" : [],
 			"resources" : function(response) {
 				return [{
 					"uri" : response.self,
@@ -58,14 +54,6 @@ function getScenario(conf) {
 				return paths;
 			},
 			"data" : [],
-			"pre" : [
-				{
-					"project" : function(res) {
-						return (res.statusCode === 200);
-					}
-				}
-			],
-			"post" : [],
 			"resources" : function(response) {
 				return [{
 					"uri" : response.self,
@@ -88,8 +76,6 @@ function getScenario(conf) {
 				}
 				return path;
 			},
-			"pre" : [],
-			"post" : [],
 			"resources" : function(response) {
 				return response.issues.map(function(issue) {
 					return {
