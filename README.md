@@ -50,11 +50,23 @@ The configuration items are as follows.
 - type : a type of the repository like 'jira', 'bitbucket', 'github', 'trac', 'redmine', etc. Currently, 'jira' is only the valid value.
 - protocol : 'http' or 'https'
 - server : host name or IP address of the repository
-- port : port number of the repository. A default value is used for an empty string.
-- rest : path to the REST API of the repository. A default value is used for an empty string.
-- username : user name of an account to the repository
-- password : password of an account to the repository
+- port : port number of the repository (Optional)
+- rest : path to the REST API of the repository. For Jira, it's usually _/rest/api/latest_.
+- username : user name of an account to the repository (Optional)
+- password : password of an account to the repository (Optional)
 - project : project ID
+
+If no authentication is required to use the REST APIs, the _username_ and _password_.
+
+For example, the configuration file for the Apache Spark project looks as
+
+> {
+	type : 'jira',
+	protocol : 'https',
+	server : 'issues.apache.org',
+	rest : '/rest/api/latest/',
+	project : 'SPARK'
+}
 
 
 # Output
