@@ -81,7 +81,20 @@ function getScenario(conf) {
 					return {
 						uri : issue.self,
 						contents : issue
-					}
+					};
+				});
+			}
+		},
+		"priorities" : {
+			"prevs" : [],
+			"method" : "GET",
+			"paths" : ["/priority"],
+			"resources" : function(response) {
+				return response.map(function(priority) {
+					return {
+						uri : priority.self,
+						contents : priority
+					};
 				});
 			}
 		}

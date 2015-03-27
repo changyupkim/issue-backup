@@ -27,7 +27,7 @@ One can download all the data of a project.
 
 # Usages
 
-Download this code base. And type in the following command.
+Download this code base. And type this in the command line.
 
 > node backup -f _FILE_ _DEST_
 

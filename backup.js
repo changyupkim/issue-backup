@@ -118,6 +118,24 @@ function checkVersions(conf, callback) {
 }
 
 /**
+ Write program versions
+ */
+function writeProgVersion(conf) {
+	var fpath = path.join(conf.dest, 'program_version.json');
+	var fd = fs.openSync(fpath, 'w');
+	if (fd < 0) {
+		var e = new Error('could not open, ' + fpath);
+		throw e;
+	} else {
+		console.log('write the program version to %s', fpath);
+
+		fs.writeSync(fd, data);
+		fs.closeSync(fd);
+	}
+
+}
+
+/**
  Checks the server (repository) if it's a proper target for backup
  */
 function check(conf, callback) {
